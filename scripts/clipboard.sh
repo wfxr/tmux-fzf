@@ -19,11 +19,11 @@ if [[ "$action" == "system" ]]; then
         copyq_list="$copyq_list $index"
         index=$((index + 1))
     done
-    copyq_index=$(echo "[cancel] $copyq_list" | sed -e 's/\] /]/' -e 's/ /\n/g' | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS --preview='copyq read {}'")
-    [[ "$copyq_index" == "[cancel]" || -z "$copyq_index" ]] && exit
+    copyq_index=$(echo "$copyq_list" | sed -e 's/\] /]/' -e 's/ /\n/g' | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS --preview='copyq read {}'")
+    [[ -z "$copyq_index" ]] && exit
     echo "$copyq_index" | xargs -I{} sh -c 'tmux set-buffer -b _temp_tmux_fzf "$(copyq read {})" && tmux paste-buffer -b _temp_tmux_fzf && tmux delete-buffer -b _temp_tmux_fzf'
 elif [[ "$action" == "buffer" ]]; then
-    selected_buffer=$(tmux list-buffers | sed 's/:.*$//' | sed '$a[cancel]' | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS --preview='tmux show-buffer -b {}'")
-    [[ "$selected_buffer" == "[cancel]" || -z "$selected_buffer" ]] && exit
+    selected_buffer=$(tmux list-buffers | sed 's/:.*$//' | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS --preview='tmux show-buffer -b {}'")
+    [[ -z "$selected_buffer" ]] && exit
     echo "$selected_buffer" | xargs -I{} sh -c 'tmux paste-buffer -b {}'
 fi
